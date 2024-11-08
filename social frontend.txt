@@ -1,0 +1,175 @@
+import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Alice', following: false },
+    { id: 2, name: 'Bob', following: false },
+    { id: 3, name: 'Charlie', following: false },
+  ]);
+  
+  const [posts, setPosts] = useState([]);
+  const [newsFeed, setNewsFeed] = useState([]);
+  const [newPost, setNewPost] = useState("");
+  const [currentUser] = useState("User123");
+
+  // Follow/Unfollow function
+  const toggleFollow = (userId) => {
+    setUsers(users.map(user => 
+      user.id === userId ? { ...user, following: !user.following } : user
+    ));
+    updateNewsFeed();
+  };
+
+  // Create post
+  const handleCreatePost = () => {
+    if (newPost) {
+      const post = { id: posts.length + 1, content: newPost, author: currentUser };
+      setPosts([post, ...posts]);
+      setNewsFeed([post, ...newsFeed]); // Add new post to news feed
+      setNewPost(""); // Clear input
+    }
+  };
+
+  // Edit post
+  const handleEditPost = (postId, updatedContent) => {
+    setPosts(posts.map(post => 
+      post.id === postId ? { ...post, content: updatedContent } : post
+    ));
+  };
+
+  // Delete post
+  const handleDeletePost = (postId) => {
+    setPosts(posts.filter(post => post.id !== postId));
+    setNewsFeed(newsFeed.filter(post => post.id !== postId));
+  };
+
+  // Update news feed to show only posts from followed users
+  const updateNewsFeed = () => {
+    const followedUsers = users.filter(user => user.following).map(user => user.name);
+    setNewsFeed(posts.filter(post => followedUsers.includes(post.author) || post.author === currentUser));
+  };
+
+  return (
+    <div id="app">
+      <header className="header">
+        <h1>Social Media Platform</h1>
+      </header>
+
+      <div className="content">
+        <div className="users">
+          <h2>People</h2>
+          {users.map((user) => (
+            <div key={user.id} className="user">
+              <span>{user.name}</span>
+              <button onClick={() => toggleFollow(user.id)}>
+                {user.following ? "Unfollow" : "Follow"}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="create-post">
+          <textarea
+            placeholder="What's on your mind?"
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+          />
+          <button onClick={handleCreatePost}>Post</button>
+        </div>
+
+        <div className="feed">
+          <h2>News Feed</h2>
+          {newsFeed.map((post) => (
+            <div key={post.id} className="post">
+              <p><strong>{post.author}</strong></p>
+              <p>{post.content}</p>
+              {post.author === currentUser && (
+                <div className="actions">
+                  <button onClick={() => handleEditPost(post.id, prompt("Edit your post:", post.content))}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleDeletePost(post.id)}>Delete</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+
+css styling
+
+#app {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  width: 100%;
+  padding: 20px;
+  background-color: #4a90e2;
+  color: white;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  width: 80%;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.users, .feed, .create-post {
+  width: 100%;
+}
+
+.users {
+  max-width: 200px;
+}
+
+.create-post textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: none;
+}
+
+button {
+  padding: 10px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #357abd;
+}
+
+.feed {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.post {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}

@@ -1,0 +1,204 @@
+import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isEmployer, setIsEmployer] = useState(false);
+  const [username, setUsername] = useState("");
+  const [jobs, setJobs] = useState([]);
+  const [newJob, setNewJob] = useState("");
+  const [notifications, setNotifications] = useState([]);
+
+  const handleLogin = (userType) => {
+    setIsLoggedIn(true);
+    setIsEmployer(userType === 'employer');
+    setUsername(userType === 'employer' ? 'Employer' : 'Job Seeker');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsEmployer(false);
+    setUsername("");
+    setJobs([]);
+    setNewJob("");
+    setNotifications([]);
+  };
+
+  const postJob = () => {
+    if (newJob) {
+      setJobs([...jobs, { title: newJob, applied: false }]);
+      setNewJob("");
+      setNotifications([...notifications, `Job '${newJob}' posted successfully!`]);
+    }
+  };
+
+  const applyForJob = (index) => {
+    let updatedJobs = [...jobs];
+    updatedJobs[index].applied = true;
+    setJobs(updatedJobs);
+    setNotifications([...notifications, `You applied for '${updatedJobs[index].title}'!`]);
+  };
+
+  const receiveNotification = (message) => {
+    setNotifications([...notifications, message]);
+  };
+
+  return (
+    <div id="app">
+      <div className="header">
+        <h1>Job Application Portal</h1>
+        {isLoggedIn ? (
+          <div>
+            <p>Welcome, {username}!</p>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        ) : (
+          <div>
+            <button onClick={() => handleLogin('job-seeker')}>Login as Job Seeker</button>
+            <button onClick={() => handleLogin('employer')}>Login as Employer</button>
+          </div>
+        )}
+      </div>
+
+      <div className="content">
+        {isLoggedIn && (
+          <>
+            <div className="notification">
+              {notifications.map((note, index) => (
+                <div key={index} className="notification-item">{note}</div>
+              ))}
+            </div>
+
+            {isEmployer ? (
+              <div className="employer-section">
+                <h2>Post a Job</h2>
+                <input
+                  type="text"
+                  value={newJob}
+                  onChange={(e) => setNewJob(e.target.value)}
+                  placeholder="Job Title"
+                />
+                <button onClick={postJob}>Post Job</button>
+                <h2>Available Jobs</h2>
+                {jobs.length > 0 ? (
+                  jobs.map((job, index) => (
+                    <div key={index} className="job-item">
+                      {job.title} - {job.applied ? "Applied" : "Available"}
+                    </div>
+                  ))
+                ) : (
+                  <p>No jobs posted yet.</p>
+                )}
+              </div>
+            ) : (
+              <div className="job-seeker-section">
+                <h2>Available Jobs</h2>
+                {jobs.length > 0 ? (
+                  jobs.map((job, index) => (
+                    <div key={index} className="job-item">
+                      {job.title}
+                      {!job.applied && <button onClick={() => applyForJob(index)}>Apply</button>}
+                      {job.applied && <span> (Applied)</span>}
+                    </div>
+                  ))
+                ) : (
+                  <p>No jobs available.</p>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+css styling 
+#app {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  width: 100%;
+  padding: 20px;
+  background-color: #4CAF50;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.content {
+  width: 60%;
+  margin-top: 20px;
+}
+
+.notification {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.notification-item {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-left: 4px solid #4CAF50;
+  margin-bottom: 5px;
+}
+
+.employer-section, .job-seeker-section {
+  margin-top: 20px;
+}
+
+.job-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.job-item button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.job-item button:hover {
+  background-color: #0056b3;
+}
+
+input[type="text"] {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
